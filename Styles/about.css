@@ -315,55 +315,93 @@ h1, h2, h3, h4, h5, h6 {
   gap: 1.5rem;
 }
 .team-card {
-  background: var(--color-white);
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow);
   transition: box-shadow var(--transition), transform var(--transition);
+  position: relative;
 }
 .team-card:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-5px);
 }
+
+/* Photo takes full card — taller so faces show clearly */
 .team-photo {
-  aspect-ratio: 3/4;
+  width: 100%;
+  aspect-ratio: 3/4;                     /* portrait — more height for the photo */
   overflow: hidden;
+  position: relative;
 }
 .team-photo img {
   width: 100%; height: 100%;
   object-fit: cover;
+  object-position: top center;
   transition: transform 0.4s ease;
+  display: block;
 }
 .team-card:hover .team-photo img { transform: scale(1.05); }
+
+/* Overlay hidden by default — slides up on hover */
+.team-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(to top, rgba(12, 28, 70, 0.95) 0%, rgba(12, 28, 70, 0.6) 70%, transparent 100%);
+  padding: 2.5rem 1rem 1rem;             /* tall gradient so faces stay visible */
+  transform: translateY(100%);           /* hidden below card by default */
+  transition: transform 0.35s ease;
+}
+.team-card:hover .team-overlay {
+  transform: translateY(0);             /* slides up on hover */
+}
+
+/* Always-visible name bar at very bottom (no hover needed) */
 .team-info {
-  padding: 1.25rem;
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(12, 28, 70, 0.88);
+  padding: 0.6rem 1rem 0.5rem;
   text-align: center;
+  transition: padding 0.35s ease;
+}
+.team-card:hover .team-info {
+  padding-bottom: 3.5rem;               /* pushes up to reveal socials in overlay */
 }
 .team-info h3 {
-  font-size: 1rem;
-  margin-bottom: 0.25rem;
-  color: var(--color-text);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.1rem;
 }
 .team-info p {
-  font-size: 0.85rem;
-  color: var(--color-primary);
-  font-weight: 600;
-  margin-bottom: 0.75rem;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.8);
+  font-weight: 500;
+  margin: 0;
 }
+
+/* Social icons inside overlay — revealed on hover */
 .team-socials {
-  display: flex; gap: 0.5rem; justify-content: center;
+  display: flex; gap: 0.5rem;
+  justify-content: center; align-items: center;
+  position: absolute;
+  bottom: 0.75rem; left: 0; right: 0;
+  opacity: 0;
+  transition: opacity 0.25s ease 0.1s;
+}
+.team-card:hover .team-socials {
+  opacity: 1;
 }
 .team-socials a {
   display: flex; align-items: center; justify-content: center;
-  width: 32px; height: 32px;
+  width: 28px; height: 28px;
   border-radius: 50%;
-  background: var(--color-bg);
-  color: var(--color-text-muted);
-  transition: background var(--transition), color var(--transition);
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  transition: background var(--transition);
 }
-.team-socials a:hover { background: var(--color-primary); color: #fff; }
-.team-socials svg { width: 14px; height: 14px; fill: currentColor; }
-
+.team-socials a:hover { background: var(--color-primary); }
+.team-socials svg { width: 12px; height: 12px; fill: currentColor; }
 /* =============================================
    STATS
    ============================================= */
@@ -432,20 +470,27 @@ h1, h2, h3, h4, h5, h6 {
 }
 .clients-track {
   display: flex;
-  gap: 3rem;
+  gap: 4rem;                             /* increased from 3rem */
   animation: scrollLogos 18s linear infinite;
   width: max-content;
+  align-items: center;
 }
 .clients-track:hover { animation-play-state: paused; }
 .client-logo {
   flex-shrink: 0;
-  width: 140px;
+  width: 200px;                          /* increased from 140px */
   display: flex; align-items: center; justify-content: center;
-  filter: grayscale(1) opacity(0.6);
-  transition: filter var(--transition);
+  filter: none;                          /* removed grayscale — full color by default */
+  transition: transform var(--transition), box-shadow var(--transition);
 }
-.client-logo:hover { filter: grayscale(0) opacity(1); }
-.client-logo img { max-height: 60px; width: auto; object-fit: contain; }
+.client-logo:hover {
+  transform: scale(1.08);               /* subtle lift on hover instead */
+}
+.client-logo img {
+  max-height: 100px;                     /* increased from 60px */
+  width: auto;
+  object-fit: contain;
+}
 @keyframes scrollLogos {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
