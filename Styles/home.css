@@ -204,6 +204,13 @@ h1, h2, h3, h4, h5, h6 {
   padding: clamp(4rem, 10vw, 7rem) var(--gutter) clamp(5rem, 12vw, 9rem);
   text-align: center;
   overflow: hidden;
+
+
+
+   min-height: 80vh; /* 👈 add this */
+  display: flex; /* optional for better centering */
+  align-items: center; /* vertical center */
+  justify-content: center; /* horizontal center */
 }
 .hero-inner { max-width: 760px; margin-inline: auto; }
 .hero-title {
