@@ -1,7 +1,11 @@
 /**
  * INPAND TECHNOLOGIES — about.js
  * About page: preloader, nav, scroll animations,
- * stat counter, testimonial carousel, back-to-top
+ * stat counter, testimonial carousel, back-to-top,
+ * sticky header shadow.
+ *
+ * Testimonial carousel is identical to home.js —
+ * including prev/next button wiring and touch/swipe support.
  */
 
 (function () {
@@ -24,7 +28,7 @@
             window.addEventListener('load', hide);
         }
 
-        // Safety fallback — force hide after 5s no matter what
+        // Safety fallback — force hide after 5 s
         setTimeout(function () { preloader.classList.add('hidden'); }, 5000);
     }
 
@@ -33,7 +37,7 @@
        ============================================= */
     function initNavToggle() {
         const toggle = document.getElementById('nav-toggle');
-        const nav = document.getElementById('site-nav');
+        const nav    = document.getElementById('site-nav');
         if (!toggle || !nav) return;
 
         toggle.addEventListener('click', function () {
@@ -97,14 +101,14 @@
         const easeOut = function (t) { return 1 - Math.pow(1 - t, 3); };
 
         const animateCounter = function (el) {
-            const target = parseInt(el.getAttribute('data-target'), 10);
+            const target   = parseInt(el.getAttribute('data-target'), 10);
             const duration = 2000;
-            const start = performance.now();
+            const start    = performance.now();
 
             const step = function (now) {
-                const elapsed = now - start;
+                const elapsed  = now - start;
                 const progress = Math.min(elapsed / duration, 1);
-                const value = Math.floor(easeOut(progress) * target);
+                const value    = Math.floor(easeOut(progress) * target);
                 el.textContent = value.toLocaleString();
                 if (progress < 1) requestAnimationFrame(step);
                 else el.textContent = target.toLocaleString();
@@ -133,15 +137,18 @@
 
     /* =============================================
        TESTIMONIAL CAROUSEL
+       — identical to home.js (prev/next + dots + swipe)
        ============================================= */
     function initTestimonialCarousel() {
-        const track = document.getElementById('testimonial-track');
+        const track         = document.getElementById('testimonial-track');
+        const prevBtn       = document.getElementById('carousel-prev');
+        const nextBtn       = document.getElementById('carousel-next');
         const dotsContainer = document.getElementById('carousel-dots');
         if (!track) return;
 
         const slides = track.querySelectorAll('.testimonial-slide');
-        const total = slides.length;
-        let current = 0;
+        const total  = slides.length;
+        let current  = 0;
         let autoTimer = null;
 
         // Build dots
@@ -162,12 +169,17 @@
 
         function goTo(index) {
             current = (index + total) % total;
-            track.style.transform = 'translateX(-' + (current * 100) + '%)';
+            requestAnimationFrame(function () {
+                track.style.transform = 'translateX(-' + (current * 100) + '%)';
+            });
             updateDots();
         }
 
+        function goNext() { goTo(current + 1); }
+        function goPrev() { goTo(current - 1); }
+
         function startAuto() {
-            autoTimer = setInterval(function () { goTo(current + 1); }, 5000);
+            autoTimer = setInterval(goNext, 5000);
         }
 
         function resetAuto() {
@@ -175,7 +187,10 @@
             startAuto();
         }
 
-        // Touch swipe
+        if (prevBtn) prevBtn.addEventListener('click', function () { goPrev(); resetAuto(); });
+        if (nextBtn) nextBtn.addEventListener('click', function () { goNext(); resetAuto(); });
+
+        // Touch / swipe support
         let touchStartX = 0;
         track.parentElement.addEventListener('touchstart', function (e) {
             touchStartX = e.changedTouches[0].screenX;
@@ -183,7 +198,7 @@
         track.parentElement.addEventListener('touchend', function (e) {
             const dx = e.changedTouches[0].screenX - touchStartX;
             if (Math.abs(dx) > 40) {
-                dx < 0 ? goTo(current + 1) : goTo(current - 1);
+                dx < 0 ? goNext() : goPrev();
                 resetAuto();
             }
         }, { passive: true });

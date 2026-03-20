@@ -290,7 +290,7 @@ h6 {
   text-align: center;
   color: #fff;
   overflow: hidden;
-  background: url("https://inpand.com/wp-content/uploads/2025/09/DSC01212-scaled-e1766143126217.jpg")
+  background: url("../assets/home-hero.png")
     center/cover no-repeat;
 }
 
@@ -646,18 +646,28 @@ h6 {
   width: 100%;
   max-width: 100%;
   padding-inline: clamp(1.5rem, 4vw, 3rem);
+  box-sizing: border-box; /* FIX 2a: ensure padding is included in width */
+  overflow: hidden;       /* FIX 2b: clip child overflow */
 }
 
 .testimonials-social {
   padding: clamp(3rem, 6vw, 5rem) 0;
   background: var(--color-white);
+  overflow: hidden; /* FIX 1: contain any internal overflow */
 }
 
 .ts-grid {
   display: grid;
-  grid-template-columns: 65% 35%;
+  grid-template-columns: 65fr 35fr; /* FIX 3: fr units share free space AFTER gap, unlike % which adds gap on top */
   gap: clamp(2rem, 5vw, 4rem);
   align-items: start;
+  min-width: 0; /* FIX 3b: allow grid to shrink below min-content */
+}
+
+.testimonials-col,
+.social-col {
+  min-width: 0; /* FIX 4: allow grid children to shrink below content size */
+  /* NOTE: overflow:hidden removed — it was clipping the Facebook iframe on mobile */
 }
 
 .testimonials-col .section-tag {
@@ -683,11 +693,14 @@ h6 {
   display: flex;
   transition: transform 0.5s ease;
   will-change: transform;
+  width: 100%; /* FIX 5a: constrain track to carousel content width */
+  max-width: 100%; /* FIX 5b: prevent track from ever exceeding container */
 }
 
 .testimonial-slide {
   min-width: 100%;
   width: 100%;
+  max-width: 100%; /* FIX 6: hard cap on slide width */
   flex-shrink: 0;
   padding: 0.5rem 1.5rem;
   box-sizing: border-box;
@@ -768,26 +781,62 @@ h6 {
 
 .fb-embed-wrapper {
   border-radius: var(--radius);
-  overflow: hidden;
+  overflow: hidden;           /* clips rounded corners only, not content */
   box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 100%;
+  /* responsive height: tall enough for timeline content */
+  position: relative;
 }
 
 .fb-embed-wrapper iframe {
   display: block;
-  width: 100%;
-  height: 493px;
+  width: 100%;                /* fills wrapper width */
+  height: 500px;              /* fixed height — matches Facebook widget height param */
   border: 0;
   outline: none;
+  min-width: 0;
 }
 
 /* Responsive */
 @media (max-width: 860px) {
   .ts-grid {
     grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  /* Testimonial carousel: stretch to fill full column width */
+  .testimonials-col {
+    width: 100%;
   }
 
   .testimonial-carousel {
     min-height: auto;
+    width: 100%;
+  }
+
+  /* Social col: center the Facebook embed in the full-width column */
+  .social-col {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* center fb embed horizontally */
+  }
+
+  .social-col .section-tag {
+    width: 100%; /* keep label left-aligned */
+  }
+
+  /* Center the wrapper and cap at 500px so FB fills it edge-to-edge */
+  .fb-embed-wrapper {
+    width: 100%;
+    max-width: 500px;
+    margin-inline: auto; /* center in column */
+  }
+
+  .fb-embed-wrapper iframe {
+    width: 100%;
+    height: 600px; /* taller when full-width for better content visibility */
   }
 }
 
@@ -1216,8 +1265,17 @@ h6 {
     padding: 0.4em 0.75em;
   }
 
-  .testimonials-social .container {
-    padding-inline: 1rem;
+  .testimonials-social .container-full {
+    padding-inline: 1rem; /* FIX 8: was .container (wrong), now targets .container-full */
+  }
+
+  /* Small mobile: fb embed fills viewport width, centered */
+  .fb-embed-wrapper {
+    max-width: 100%; /* on small phones, fill fully */
+  }
+
+  .fb-embed-wrapper iframe {
+    height: 500px;
   }
 
   .testimonial-carousel {
@@ -1245,5 +1303,41 @@ h6 {
 
   .carousel-controls {
     gap: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra safety: all section elements stay within viewport */
+  .testimonials-social,
+  .container-full,
+  .ts-grid {
+    overflow: hidden;
+  }
+
+  /* Testimonial carousel: full width */
+  .testimonials-col,
+  .testimonial-carousel {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Facebook: full width on small phones, centered */
+  .social-col {
+    align-items: center;
+  }
+
+  .fb-embed-wrapper {
+    width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  .fb-embed-wrapper iframe {
+    width: 100%;
+    height: 460px;
+  }
+
+  .testimonials-col h2 {
+    font-size: clamp(1.4rem, 6vw, 1.75rem);
   }
 }
