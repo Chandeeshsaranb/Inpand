@@ -145,7 +145,11 @@
 
         function goTo(index) {
             current = (index + total) % total;
-            track.style.transform = 'translateX(-' + (current * 100) + '%)';
+
+            requestAnimationFrame(() => {
+                track.style.transform = `translateX(-${current * 100}%)`;
+            });
+
             updateDots();
         }
 

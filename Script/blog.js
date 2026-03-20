@@ -1,137 +1,201 @@
-// Mobile nav
-const menuToggle = document.getElementById("menuToggle");
-const siteNav = document.getElementById("siteNav");
+/**
+ * INPAND TECHNOLOGIES — blog.js
+ * Vanilla JS for: preloader, nav toggle, scroll animations,
+ * testimonial carousel, back-to-top, sticky header, reveal
+ */
 
-if (menuToggle && siteNav) {
-    menuToggle.addEventListener("click", () => {
-        const isOpen = siteNav.classList.toggle("is-open");
-        menuToggle.setAttribute("aria-expanded", String(isOpen));
-    });
+(function () {
+    'use strict';
 
-    siteNav.querySelectorAll("a").forEach((link) => {
-        link.addEventListener("click", () => {
-            siteNav.classList.remove("is-open");
-            menuToggle.setAttribute("aria-expanded", "false");
-        });
-    });
-}
+    /* =============================================
+       PRELOADER
+       ============================================= */
+    function initPreloader() {
+        const preloader = document.getElementById('preloader');
+        if (!preloader) return;
 
-// Back to top
-const backToTop = document.getElementById("backToTop");
+        const hide = function () {
+            setTimeout(function () {
+                preloader.classList.add('hidden');
+            }, 400);
+        };
 
-if (backToTop) {
-    window.addEventListener("scroll", () => {
-        backToTop.style.display = window.scrollY > 300 ? "block" : "none";
-    });
-
-    backToTop.addEventListener("click", () => {
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-        });
-    });
-}
-
-// Reveal animation
-const revealItems = document.querySelectorAll(".reveal");
-
-const revealObserver = new IntersectionObserver(
-    (entries) => {
-        entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add("is-visible");
-                revealObserver.unobserve(entry.target);
-            }
-        });
-    },
-    { threshold: 0.12 }
-);
-
-revealItems.forEach((item) => revealObserver.observe(item));
-
-// Testimonial slider
-const testimonialCards = document.querySelectorAll(".testimonial-card");
-const prevSlideBtn = document.getElementById("prevSlide");
-const nextSlideBtn = document.getElementById("nextSlide");
-const sliderDots = document.getElementById("sliderDots");
-
-let currentSlide = 0;
-let autoSlide;
-
-function renderDots() {
-    if (!sliderDots) return;
-
-    sliderDots.innerHTML = "";
-    testimonialCards.forEach((_, index) => {
-        const dot = document.createElement("button");
-        dot.className = "slider-dot";
-        dot.type = "button";
-        dot.setAttribute("aria-label", `Go to testimonial ${index + 1}`);
-
-        if (index === currentSlide) {
-            dot.classList.add("active");
+        if (document.readyState === 'complete') {
+            hide();
+        } else {
+            window.addEventListener('load', hide);
         }
 
-        dot.addEventListener("click", () => {
-            goToSlide(index);
-            restartAutoSlide();
+        // Safety fallback — force hide after 5s
+        setTimeout(function () { preloader.classList.add('hidden'); }, 5000);
+    }
+
+    /* =============================================
+       MOBILE NAV TOGGLE
+       ============================================= */
+    function initNavToggle() {
+        const toggle = document.getElementById('nav-toggle');
+        const nav = document.getElementById('site-nav');
+        if (!toggle || !nav) return;
+
+        toggle.addEventListener('click', function () {
+            const isOpen = nav.classList.toggle('open');
+            toggle.classList.toggle('open', isOpen);
+            toggle.setAttribute('aria-expanded', isOpen);
         });
 
-        sliderDots.appendChild(dot);
-    });
-}
+        nav.querySelectorAll('a').forEach(function (link) {
+            link.addEventListener('click', function () {
+                nav.classList.remove('open');
+                toggle.classList.remove('open');
+                toggle.setAttribute('aria-expanded', 'false');
+            });
+        });
 
-function showSlide(index) {
-    testimonialCards.forEach((card, cardIndex) => {
-        card.classList.toggle("active", cardIndex === index);
-    });
-
-    const dots = sliderDots ? sliderDots.querySelectorAll(".slider-dot") : [];
-    dots.forEach((dot, dotIndex) => {
-        dot.classList.toggle("active", dotIndex === index);
-    });
-}
-
-function goToSlide(index) {
-    if (!testimonialCards.length) return;
-    currentSlide = (index + testimonialCards.length) % testimonialCards.length;
-    showSlide(currentSlide);
-}
-
-function nextSlide() {
-    goToSlide(currentSlide + 1);
-}
-
-function prevSlide() {
-    goToSlide(currentSlide - 1);
-}
-
-function startAutoSlide() {
-    if (testimonialCards.length <= 1) return;
-    autoSlide = setInterval(nextSlide, 5000);
-}
-
-function restartAutoSlide() {
-    clearInterval(autoSlide);
-    startAutoSlide();
-}
-
-if (testimonialCards.length) {
-    renderDots();
-    showSlide(currentSlide);
-    startAutoSlide();
-
-    if (nextSlideBtn) {
-        nextSlideBtn.addEventListener("click", () => {
-            nextSlide();
-            restartAutoSlide();
+        document.addEventListener('click', function (e) {
+            if (!nav.contains(e.target) && !toggle.contains(e.target)) {
+                nav.classList.remove('open');
+                toggle.classList.remove('open');
+                toggle.setAttribute('aria-expanded', 'false');
+            }
         });
     }
 
-    if (prevSlideBtn) {
-        prevSlideBtn.addEventListener("click", () => {
-            prevSlide();
-            restartAutoSlide();
+    /* =============================================
+       REVEAL ANIMATION
+       ============================================= */
+    function initReveal() {
+        const items = document.querySelectorAll('.reveal');
+        if (!items.length) return;
+
+        if (!('IntersectionObserver' in window)) {
+            items.forEach(function (el) { el.classList.add('is-visible'); });
+            return;
+        }
+
+        const observer = new IntersectionObserver(
+            function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            },
+            { threshold: 0.12 }
+        );
+
+        items.forEach(function (el) { observer.observe(el); });
+    }
+
+    /* =============================================
+       TESTIMONIAL CAROUSEL (same as home.js)
+       ============================================= */
+    function initTestimonialCarousel() {
+        const track = document.getElementById('testimonial-track');
+        const prevBtn = document.getElementById('carousel-prev');
+        const nextBtn = document.getElementById('carousel-next');
+        const dotsContainer = document.getElementById('carousel-dots');
+        if (!track) return;
+
+        const slides = track.querySelectorAll('.testimonial-slide');
+        const total = slides.length;
+        let current = 0;
+        let autoTimer = null;
+
+        slides.forEach(function (_, i) {
+            const dot = document.createElement('button');
+            dot.classList.add('dot');
+            dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+            if (i === 0) dot.classList.add('active');
+            dot.addEventListener('click', function () { goTo(i); resetAuto(); });
+            dotsContainer.appendChild(dot);
+        });
+
+        function updateDots() {
+            dotsContainer.querySelectorAll('.dot').forEach(function (dot, i) {
+                dot.classList.toggle('active', i === current);
+            });
+        }
+
+        function goTo(index) {
+            current = (index + total) % total;
+            requestAnimationFrame(function () {
+                track.style.transform = 'translateX(-' + (current * 100) + '%)';
+            });
+            updateDots();
+        }
+
+        function goNext() { goTo(current + 1); }
+        function goPrev() { goTo(current - 1); }
+
+        function startAuto() { autoTimer = setInterval(goNext, 5000); }
+        function resetAuto() { clearInterval(autoTimer); startAuto(); }
+
+        if (prevBtn) prevBtn.addEventListener('click', function () { goPrev(); resetAuto(); });
+        if (nextBtn) nextBtn.addEventListener('click', function () { goNext(); resetAuto(); });
+
+        let touchStartX = 0;
+        track.parentElement.addEventListener('touchstart', function (e) {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        track.parentElement.addEventListener('touchend', function (e) {
+            const dx = e.changedTouches[0].screenX - touchStartX;
+            if (Math.abs(dx) > 40) { dx < 0 ? goNext() : goPrev(); resetAuto(); }
+        }, { passive: true });
+
+        track.parentElement.addEventListener('mouseenter', function () { clearInterval(autoTimer); });
+        track.parentElement.addEventListener('mouseleave', startAuto);
+
+        startAuto();
+    }
+
+    /* =============================================
+       BACK TO TOP
+       ============================================= */
+    function initBackToTop() {
+        const btn = document.getElementById('back-to-top');
+        if (!btn) return;
+
+        window.addEventListener('scroll', function () {
+            btn.classList.toggle('visible', window.scrollY > 300);
+        }, { passive: true });
+
+        btn.addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
-}
+
+    /* =============================================
+       STICKY HEADER SHADOW
+       ============================================= */
+    function initStickyHeader() {
+        const header = document.getElementById('site-header');
+        if (!header) return;
+
+        window.addEventListener('scroll', function () {
+            header.style.boxShadow = window.scrollY > 10
+                ? '0 2px 20px rgba(0,0,0,0.12)'
+                : '0 2px 12px rgba(0,0,0,0.07)';
+        }, { passive: true });
+    }
+
+    /* =============================================
+       INIT ALL
+       ============================================= */
+    function init() {
+        initPreloader();
+        initNavToggle();
+        initReveal();
+        initTestimonialCarousel();
+        initBackToTop();
+        initStickyHeader();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+})();

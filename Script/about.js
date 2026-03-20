@@ -13,9 +13,19 @@
     function initPreloader() {
         const preloader = document.getElementById('preloader');
         if (!preloader) return;
-        window.addEventListener('load', function () {
+
+        const hide = function () {
             setTimeout(function () { preloader.classList.add('hidden'); }, 400);
-        });
+        };
+
+        if (document.readyState === 'complete') {
+            hide();
+        } else {
+            window.addEventListener('load', hide);
+        }
+
+        // Safety fallback — force hide after 5s no matter what
+        setTimeout(function () { preloader.classList.add('hidden'); }, 5000);
     }
 
     /* =============================================
