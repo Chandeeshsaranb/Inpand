@@ -8,60 +8,6 @@
     'use strict';
 
     /* =============================================
-       PRELOADER
-       ============================================= */
-    function initPreloader() {
-        const preloader = document.getElementById('preloader');
-        if (!preloader) return;
-
-        const hide = function () {
-            setTimeout(function () {
-                preloader.classList.add('hidden');
-            }, 400);
-        };
-
-        if (document.readyState === 'complete') {
-            hide();
-        } else {
-            window.addEventListener('load', hide);
-        }
-
-        // Safety fallback — force hide after 5s
-        setTimeout(function () { preloader.classList.add('hidden'); }, 5000);
-    }
-
-    /* =============================================
-       MOBILE NAV TOGGLE
-       ============================================= */
-    function initNavToggle() {
-        const toggle = document.getElementById('nav-toggle');
-        const nav = document.getElementById('site-nav');
-        if (!toggle || !nav) return;
-
-        toggle.addEventListener('click', function () {
-            const isOpen = nav.classList.toggle('open');
-            toggle.classList.toggle('open', isOpen);
-            toggle.setAttribute('aria-expanded', isOpen);
-        });
-
-        nav.querySelectorAll('a').forEach(function (link) {
-            link.addEventListener('click', function () {
-                nav.classList.remove('open');
-                toggle.classList.remove('open');
-                toggle.setAttribute('aria-expanded', 'false');
-            });
-        });
-
-        document.addEventListener('click', function (e) {
-            if (!nav.contains(e.target) && !toggle.contains(e.target)) {
-                nav.classList.remove('open');
-                toggle.classList.remove('open');
-                toggle.setAttribute('aria-expanded', 'false');
-            }
-        });
-    }
-
-    /* =============================================
        SCROLL ANIMATIONS (IntersectionObserver)
        ============================================= */
     function initScrollAnimations() {
@@ -165,36 +111,6 @@
     }
 
     /* =============================================
-       BACK TO TOP
-       ============================================= */
-    function initBackToTop() {
-        const btn = document.getElementById('back-to-top');
-        if (!btn) return;
-
-        window.addEventListener('scroll', function () {
-            btn.classList.toggle('visible', window.scrollY > 300);
-        }, { passive: true });
-
-        btn.addEventListener('click', function () {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    }
-
-    /* =============================================
-       STICKY HEADER SHADOW
-       ============================================= */
-    function initStickyHeader() {
-        const header = document.getElementById('site-header');
-        if (!header) return;
-
-        window.addEventListener('scroll', function () {
-            header.style.boxShadow = window.scrollY > 10
-                ? '0 2px 20px rgba(0,0,0,0.12)'
-                : '0 2px 12px rgba(0,0,0,0.07)';
-        }, { passive: true });
-    }
-
-    /* =============================================
        SMOOTH SCROLL FOR ANCHOR LINKS
        ============================================= */
     function initSmoothScroll() {
@@ -212,16 +128,67 @@
     }
 
     /* =============================================
+       FACEBOOK IFRAME — RESPONSIVE WIDTH
+       ResizeObserver watches the wrapper and rebuilds
+       the iframe src with the exact container pixel width
+       so Facebook renders content edge-to-edge always.
+       ============================================= */
+    function initFbResponsive() {
+        const wrapper = document.querySelector('.fb-embed-wrapper');
+        if (!wrapper) return;
+
+        const BASE_URL = 'https://www.facebook.com/plugins/page.php'
+            + '?href=https%3A%2F%2Fwww.facebook.com%2Fprofile.php%3Fid%3D61567145293560'
+            + '&tabs=timeline'
+            + '&small_header=false'
+            + '&adapt_container_width=true'
+            + '&hide_cover=false'
+            + '&show_facepile=true';
+
+        function rebuildIframe(width) {
+            const fbWidth = Math.min(500, Math.max(180, Math.floor(width)));
+            const fbHeight = 600;
+
+            const old = wrapper.querySelector('iframe');
+            if (old) old.remove();
+
+            const iframe = document.createElement('iframe');
+            iframe.src = BASE_URL + '&width=' + fbWidth + '&height=' + fbHeight;
+            iframe.width = '100%';
+            iframe.height = fbHeight;
+            iframe.style.cssText = 'border:none;overflow:hidden;width:100%;display:block;';
+            iframe.scrolling = 'no';
+            iframe.frameBorder = '0';
+            iframe.allow = 'encrypted-media';
+            iframe.loading = 'lazy';
+            iframe.title = 'Inpand Technologies Facebook';
+
+            wrapper.appendChild(iframe);
+        }
+
+        if ('ResizeObserver' in window) {
+            let lastWidth = 0;
+            const ro = new ResizeObserver(function (entries) {
+                const w = Math.floor(entries[0].contentRect.width);
+                if (w > 0 && w !== lastWidth) {
+                    lastWidth = w;
+                    rebuildIframe(w);
+                }
+            });
+            ro.observe(wrapper);
+        } else {
+            rebuildIframe(wrapper.offsetWidth || 500);
+        }
+    }
+
+    /* =============================================
        INIT ALL
        ============================================= */
     function init() {
-        initPreloader();
-        initNavToggle();
         initScrollAnimations();
         initTestimonialCarousel();
-        initBackToTop();
-        initStickyHeader();
         initSmoothScroll();
+        initFbResponsive();
     }
 
     if (document.readyState === 'loading') {

@@ -1,65 +1,10 @@
 /**
  * INPAND TECHNOLOGIES — blog.js
- * Vanilla JS for: preloader, nav toggle, scroll animations,
- * testimonial carousel, back-to-top, sticky header, reveal
+ * Handles: scroll reveal animations, FAQ accordion
  */
 
 (function () {
     'use strict';
-
-    /* =============================================
-       PRELOADER
-       ============================================= */
-    function initPreloader() {
-        const preloader = document.getElementById('preloader');
-        if (!preloader) return;
-
-        const hide = function () {
-            setTimeout(function () {
-                preloader.classList.add('hidden');
-            }, 400);
-        };
-
-        if (document.readyState === 'complete') {
-            hide();
-        } else {
-            window.addEventListener('load', hide);
-        }
-
-        // Safety fallback — force hide after 5s
-        setTimeout(function () { preloader.classList.add('hidden'); }, 5000);
-    }
-
-    /* =============================================
-       MOBILE NAV TOGGLE
-       ============================================= */
-    function initNavToggle() {
-        const toggle = document.getElementById('nav-toggle');
-        const nav = document.getElementById('site-nav');
-        if (!toggle || !nav) return;
-
-        toggle.addEventListener('click', function () {
-            const isOpen = nav.classList.toggle('open');
-            toggle.classList.toggle('open', isOpen);
-            toggle.setAttribute('aria-expanded', isOpen);
-        });
-
-        nav.querySelectorAll('a').forEach(function (link) {
-            link.addEventListener('click', function () {
-                nav.classList.remove('open');
-                toggle.classList.remove('open');
-                toggle.setAttribute('aria-expanded', 'false');
-            });
-        });
-
-        document.addEventListener('click', function (e) {
-            if (!nav.contains(e.target) && !toggle.contains(e.target)) {
-                nav.classList.remove('open');
-                toggle.classList.remove('open');
-                toggle.setAttribute('aria-expanded', 'false');
-            }
-        });
-    }
 
     /* =============================================
        REVEAL ANIMATION
@@ -82,19 +27,47 @@
                     }
                 });
             },
-            { threshold: 0.12 }
+            { threshold: 0.01 }
         );
 
         items.forEach(function (el) { observer.observe(el); });
     }
 
     /* =============================================
-       TESTIMONIAL CAROUSEL (same as home.js)
+       FAQ ACCORDION
+       ============================================= */
+    function initFaq() {
+        const items = document.querySelectorAll('.faq-item');
+        if (!items.length) return;
+
+        items.forEach(function (item) {
+            const btn = item.querySelector('.faq-question');
+            if (!btn) return;
+
+            btn.addEventListener('click', function () {
+                const isOpen = item.classList.contains('open');
+
+                // Close all
+                items.forEach(function (i) {
+                    i.classList.remove('open');
+                    const b = i.querySelector('.faq-question');
+                    if (b) b.setAttribute('aria-expanded', 'false');
+                });
+
+                // Open clicked if it was closed
+                if (!isOpen) {
+                    item.classList.add('open');
+                    btn.setAttribute('aria-expanded', 'true');
+                }
+            });
+        });
+    }
+
+    /* =============================================
+       TESTIMONIAL CAROUSEL
        ============================================= */
     function initTestimonialCarousel() {
         const track = document.getElementById('testimonial-track');
-        const prevBtn = document.getElementById('carousel-prev');
-        const nextBtn = document.getElementById('carousel-next');
         const dotsContainer = document.getElementById('carousel-dots');
         if (!track) return;
 
@@ -127,13 +100,9 @@
         }
 
         function goNext() { goTo(current + 1); }
-        function goPrev() { goTo(current - 1); }
 
         function startAuto() { autoTimer = setInterval(goNext, 5000); }
         function resetAuto() { clearInterval(autoTimer); startAuto(); }
-
-        if (prevBtn) prevBtn.addEventListener('click', function () { goPrev(); resetAuto(); });
-        if (nextBtn) nextBtn.addEventListener('click', function () { goNext(); resetAuto(); });
 
         let touchStartX = 0;
         track.parentElement.addEventListener('touchstart', function (e) {
@@ -141,7 +110,7 @@
         }, { passive: true });
         track.parentElement.addEventListener('touchend', function (e) {
             const dx = e.changedTouches[0].screenX - touchStartX;
-            if (Math.abs(dx) > 40) { dx < 0 ? goNext() : goPrev(); resetAuto(); }
+            if (Math.abs(dx) > 40) { dx < 0 ? goNext() : goTo(current - 1); resetAuto(); }
         }, { passive: true });
 
         track.parentElement.addEventListener('mouseenter', function () { clearInterval(autoTimer); });
@@ -151,45 +120,57 @@
     }
 
     /* =============================================
-       BACK TO TOP
+       FACEBOOK IFRAME — RESPONSIVE WIDTH
        ============================================= */
-    function initBackToTop() {
-        const btn = document.getElementById('back-to-top');
-        if (!btn) return;
+    function initFbResponsive() {
+        const wrapper = document.querySelector('.fb-embed-wrapper');
+        if (!wrapper) return;
 
-        window.addEventListener('scroll', function () {
-            btn.classList.toggle('visible', window.scrollY > 300);
-        }, { passive: true });
+        const BASE_URL = 'https://www.facebook.com/plugins/page.php'
+            + '?href=https%3A%2F%2Fwww.facebook.com%2Fprofile.php%3Fid%3D61567145293560'
+            + '&tabs=timeline'
+            + '&small_header=false'
+            + '&adapt_container_width=true'
+            + '&hide_cover=false'
+            + '&show_facepile=true';
 
-        btn.addEventListener('click', function () {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    }
+        function rebuildIframe(width) {
+            const fbWidth = Math.min(500, Math.max(180, Math.floor(width)));
+            const old = wrapper.querySelector('iframe');
+            if (old) old.remove();
+            const iframe = document.createElement('iframe');
+            iframe.src = BASE_URL + '&width=' + fbWidth + '&height=600';
+            iframe.width = '100%';
+            iframe.height = 600;
+            iframe.style.cssText = 'border:none;overflow:hidden;width:100%;display:block;';
+            iframe.scrolling = 'no';
+            iframe.frameBorder = '0';
+            iframe.allow = 'encrypted-media';
+            iframe.loading = 'lazy';
+            iframe.title = 'Inpand Technologies Facebook';
+            wrapper.appendChild(iframe);
+        }
 
-    /* =============================================
-       STICKY HEADER SHADOW
-       ============================================= */
-    function initStickyHeader() {
-        const header = document.getElementById('site-header');
-        if (!header) return;
-
-        window.addEventListener('scroll', function () {
-            header.style.boxShadow = window.scrollY > 10
-                ? '0 2px 20px rgba(0,0,0,0.12)'
-                : '0 2px 12px rgba(0,0,0,0.07)';
-        }, { passive: true });
+        if ('ResizeObserver' in window) {
+            let lastWidth = 0;
+            const ro = new ResizeObserver(function (entries) {
+                const w = Math.floor(entries[0].contentRect.width);
+                if (w > 0 && w !== lastWidth) { lastWidth = w; rebuildIframe(w); }
+            });
+            ro.observe(wrapper);
+        } else {
+            rebuildIframe(wrapper.offsetWidth || 500);
+        }
     }
 
     /* =============================================
        INIT ALL
        ============================================= */
     function init() {
-        initPreloader();
-        initNavToggle();
         initReveal();
+        initFaq();
         initTestimonialCarousel();
-        initBackToTop();
-        initStickyHeader();
+        initFbResponsive();
     }
 
     if (document.readyState === 'loading') {

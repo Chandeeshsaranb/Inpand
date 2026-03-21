@@ -70,6 +70,10 @@ a:hover {
   text-decoration: underline;
 }
 
+.btn:hover {
+  text-decoration: none;
+}
+
 ul {
   list-style: none;
 }
@@ -135,6 +139,7 @@ h6 {
 }
 
 @keyframes bounce {
+
   0%,
   80%,
   100% {
@@ -150,7 +155,9 @@ h6 {
    HEADER
    ============================================= */
 .site-header {
+  position: relative;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+  z-index: 500;
 }
 
 .header-inner {
@@ -228,9 +235,17 @@ h6 {
   transition: var(--transition);
 }
 
-.nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.nav-toggle.open span:nth-child(2) { opacity: 0; }
-.nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.nav-toggle.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.nav-toggle.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
 
 /* =============================================
    BUTTONS
@@ -699,8 +714,13 @@ h6 {
 }
 
 @keyframes scrollLogos {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 /* =============================================
@@ -708,25 +728,42 @@ h6 {
    — identical to home.css
    ============================================= */
 
-/* container-full: full-width wrapper used by the testimonials section */
+/* Outer section */
+.testimonials-social {
+  padding: clamp(3rem, 6vw, 5rem) 0;
+  background: var(--color-white);
+  overflow: hidden;
+}
+
+/* Outer container — full width with side padding */
 .container-full {
   width: 100%;
   max-width: 100%;
   padding-inline: clamp(1.5rem, 4vw, 3rem);
+  box-sizing: border-box;
 }
 
-.testimonials-social {
-  padding: clamp(3rem, 6vw, 5rem) 0;
-  background: var(--color-white);
-}
-
-.ts-grid {
-  display: grid;
-  grid-template-columns: 65% 35%;
+/* ── Flex row: testimonials col + social col side by side ── */
+.ts-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
   gap: clamp(2rem, 5vw, 4rem);
-  align-items: start;
 }
 
+/* Testimonials column: takes ~65% of available width */
+.testimonials-col {
+  flex: 65;
+  min-width: 0;
+}
+
+/* Social column: takes ~35% of available width */
+.social-col {
+  flex: 18;
+  min-width: 0;
+}
+
+/* ── Testimonials column content ── */
 .testimonials-col .section-tag {
   display: block;
   margin-bottom: 0.5rem;
@@ -744,12 +781,15 @@ h6 {
   border-radius: var(--radius);
   padding: 2.5rem;
   min-height: 280px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .testimonial-track {
   display: flex;
   transition: transform 0.5s ease;
   will-change: transform;
+  width: 100%;
 }
 
 .testimonial-slide {
@@ -827,7 +867,7 @@ h6 {
   background: var(--color-primary);
 }
 
-/* Social column */
+/* ── Social column content ── */
 .social-col .section-tag {
   display: block;
   margin-bottom: 0.75rem;
@@ -837,14 +877,19 @@ h6 {
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 100%;
+  position: relative;
 }
 
 .fb-embed-wrapper iframe {
   display: block;
   width: 100%;
-  height: 493px;
+  height: 500px;
   border: 0;
   outline: none;
+  border: none;
+  min-width: 0;
 }
 
 /* =============================================
@@ -1098,11 +1143,34 @@ h6 {
 /* =============================================
    SCROLL ANIMATIONS
    ============================================= */
-.animate-zoom     { opacity: 0; transform: scale(0.85);      transition: opacity 0.6s ease, transform 0.6s ease; }
-.animate-fade     { opacity: 0;                               transition: opacity 0.6s ease 0.3s; }
-.animate-left     { opacity: 0; transform: translateX(-30px); transition: opacity 0.6s ease, transform 0.6s ease; }
-.animate-right    { opacity: 0; transform: translateX(30px);  transition: opacity 0.6s ease, transform 0.6s ease; }
-.animate-up       { opacity: 0; transform: translateY(40px);  transition: opacity 0.7s ease, transform 0.7s ease; }
+.animate-zoom {
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.animate-fade {
+  opacity: 0;
+  transition: opacity 0.6s ease 0.3s;
+}
+
+.animate-left {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.animate-right {
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.animate-up {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
 
 .animated {
   opacity: 1 !important;
@@ -1113,10 +1181,59 @@ h6 {
    RESPONSIVE
    ============================================= */
 @media (max-width: 1024px) {
-  .footer-grid { grid-template-columns: 1fr 1fr; }
-  .footer-map  { grid-column: 1 / -1; }
-  .team-grid   { grid-template-columns: repeat(2, 1fr); }
-  .stats-grid  { grid-template-columns: repeat(2, 1fr); }
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .footer-map {
+    grid-column: 1 / -1;
+  }
+
+  .team-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Stack testimonials + social on Nest Hub / tablet */
+  .ts-row {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .testimonials-col {
+    flex: none;
+    width: 100%;
+  }
+
+  .testimonial-carousel {
+    min-height: auto;
+    width: 100%;
+  }
+
+  .social-col {
+    flex: none;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .social-col .section-tag {
+    width: 100%;
+  }
+
+  .fb-embed-wrapper {
+    width: 100%;
+    max-width: 500px;
+    margin-inline: auto;
+  }
+
+  .fb-embed-wrapper iframe {
+    height: 600px;
+  }
 }
 
 @media (max-width: 860px) {
@@ -1124,24 +1241,27 @@ h6 {
     grid-template-columns: repeat(2, 1fr);
     row-gap: 2rem;
   }
+}
 
-  .ts-grid {
+@media (max-width: 768px) {
+  .who-grid {
     grid-template-columns: 1fr;
   }
 
-  .testimonial-carousel {
-    min-height: auto;
+  .who-image {
+    max-width: 420px;
+    margin-inline: auto;
+  }
+
+  .mv-grid {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
-  .who-grid  { grid-template-columns: 1fr; }
-  .who-image { max-width: 420px; margin-inline: auto; }
-  .mv-grid   { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 640px) {
-  .nav-toggle { display: flex; }
+  .nav-toggle {
+    display: flex;
+  }
 
   .site-nav {
     position: absolute;
@@ -1150,19 +1270,42 @@ h6 {
     right: 0;
     background: var(--color-white);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.4s ease;
+    display: none;
+    z-index: 100;
   }
 
-  .site-nav.open  { max-height: 400px; }
-  .site-nav ul    { flex-direction: column; padding: 0.75rem 0; }
-  .site-nav a     { padding: 0.65rem 1.5rem; }
-  .site-header    { position: relative; }
+  .site-nav.open {
+    display: block;
+  }
 
-  .team-grid   { grid-template-columns: 1fr; }
-  .stats-grid  { grid-template-columns: repeat(2, 1fr); }
-  .footer-grid { grid-template-columns: 1fr; }
+  .site-nav ul {
+    flex-direction: column;
+    padding: 0.75rem 0;
+  }
+
+  .site-nav a {
+    padding: 0.65rem 1.5rem;
+  }
+
+  .site-header {
+    position: relative;
+  }
+
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .testimonials-social .container-full {
+    padding-inline: 1rem;
+  }
 
   .testimonial-carousel {
     padding: 1.5rem 1rem;
@@ -1173,11 +1316,95 @@ h6 {
     text-align: center;
   }
 
+  .fb-embed-wrapper {
+    max-width: 100%;
+  }
+
+  .fb-embed-wrapper iframe {
+    height: 500px;
+  }
+
   .testimonials-col h2 {
     font-size: clamp(1.8rem, 7vw, 2.4rem);
   }
 }
 
 @media (max-width: 480px) {
-  .stats-grid { grid-template-columns: 1fr; }
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =============================================
+   MOBILE NAV OVERLAY
+   ============================================= */
+.mobile-nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  z-index: 9000;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.mobile-nav-overlay.open {
+  display: flex;
+}
+
+.mobile-nav-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.mobile-nav-logo img {
+  height: 72px;
+  width: auto;
+}
+
+.mobile-nav-close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--color-text);
+  padding: 0.25rem 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.mobile-nav-links {
+  padding: 1.5rem 1.5rem 2rem;
+}
+
+.mobile-nav-links ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-nav-links li {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.mobile-nav-links a {
+  display: block;
+  padding: 1.1rem 0;
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+.mobile-nav-links a:hover,
+.mobile-nav-links a.active {
+  color: var(--color-primary);
+  text-decoration: none;
 }

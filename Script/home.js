@@ -1,58 +1,10 @@
 /**
  * INPAND TECHNOLOGIES — home.js
- * Vanilla JS for: preloader, nav toggle, scroll animations,
- * portfolio filter, testimonial carousel, back-to-top
+ * Handles: scroll animations, portfolio filter, testimonial carousel, FB embed
  */
 
 (function () {
     'use strict';
-
-    /* =============================================
-       PRELOADER
-       ============================================= */
-    function initPreloader() {
-        const preloader = document.getElementById('preloader');
-        if (!preloader) return;
-
-        window.addEventListener('load', function () {
-            setTimeout(function () {
-                preloader.classList.add('hidden');
-            }, 400);
-        });
-    }
-
-    /* =============================================
-       MOBILE NAV TOGGLE
-       ============================================= */
-    function initNavToggle() {
-        const toggle = document.getElementById('nav-toggle');
-        const nav = document.getElementById('site-nav');
-        if (!toggle || !nav) return;
-
-        toggle.addEventListener('click', function () {
-            const isOpen = nav.classList.toggle('open');
-            toggle.classList.toggle('open', isOpen);
-            toggle.setAttribute('aria-expanded', isOpen);
-        });
-
-        // Close nav when a link is clicked
-        nav.querySelectorAll('a').forEach(function (link) {
-            link.addEventListener('click', function () {
-                nav.classList.remove('open');
-                toggle.classList.remove('open');
-                toggle.setAttribute('aria-expanded', 'false');
-            });
-        });
-
-        // Close on outside click
-        document.addEventListener('click', function (e) {
-            if (!nav.contains(e.target) && !toggle.contains(e.target)) {
-                nav.classList.remove('open');
-                toggle.classList.remove('open');
-                toggle.setAttribute('aria-expanded', 'false');
-            }
-        });
-    }
 
     /* =============================================
        SCROLL ANIMATIONS (IntersectionObserver)
@@ -189,46 +141,70 @@
     }
 
     /* =============================================
-       BACK TO TOP
+       FACEBOOK IFRAME — RESPONSIVE WIDTH
+       ResizeObserver watches the wrapper and rebuilds
+       the iframe src with the exact container pixel width
+       so Facebook renders content edge-to-edge always.
        ============================================= */
-    function initBackToTop() {
-        const btn = document.getElementById('back-to-top');
-        if (!btn) return;
+    function initFbResponsive() {
+        const wrapper = document.querySelector('.fb-embed-wrapper');
+        if (!wrapper) return;
 
-        window.addEventListener('scroll', function () {
-            btn.classList.toggle('visible', window.scrollY > 300);
-        }, { passive: true });
+        const BASE_URL = 'https://www.facebook.com/plugins/page.php'
+            + '?href=https%3A%2F%2Fwww.facebook.com%2Fprofile.php%3Fid%3D61567145293560'
+            + '&tabs=timeline'
+            + '&small_header=false'
+            + '&adapt_container_width=true'
+            + '&hide_cover=false'
+            + '&show_facepile=true';
 
-        btn.addEventListener('click', function () {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    }
+        function rebuildIframe(width) {
+            // FB minimum is 180px, maximum is 500px
+            const fbWidth = Math.min(500, Math.max(180, Math.floor(width)));
+            const fbHeight = 600;
 
-    /* =============================================
-       STICKY HEADER SHADOW
-       ============================================= */
-    function initStickyHeader() {
-        const header = document.getElementById('site-header');
-        if (!header) return;
+            // Remove old iframe if present
+            const old = wrapper.querySelector('iframe');
+            if (old) old.remove();
 
-        window.addEventListener('scroll', function () {
-            header.style.boxShadow = window.scrollY > 10
-                ? '0 2px 20px rgba(0,0,0,0.12)'
-                : '0 2px 12px rgba(0,0,0,0.07)';
-        }, { passive: true });
+            const iframe = document.createElement('iframe');
+            iframe.src = BASE_URL + '&width=' + fbWidth + '&height=' + fbHeight;
+            iframe.width = '100%';
+            iframe.height = fbHeight;
+            iframe.style.cssText = 'border:none;overflow:hidden;width:100%;display:block;';
+            iframe.scrolling = 'no';
+            iframe.frameBorder = '0';
+            iframe.allow = 'encrypted-media';
+            iframe.loading = 'lazy';
+            iframe.title = 'Inpand Technologies Facebook';
+
+            wrapper.appendChild(iframe);
+        }
+
+        if ('ResizeObserver' in window) {
+            let lastWidth = 0;
+            const ro = new ResizeObserver(function (entries) {
+                const w = Math.floor(entries[0].contentRect.width);
+                if (w > 0 && w !== lastWidth) {
+                    lastWidth = w;
+                    rebuildIframe(w);
+                }
+            });
+            ro.observe(wrapper);
+        } else {
+            // Fallback for older browsers — just use wrapper width once
+            rebuildIframe(wrapper.offsetWidth || 500);
+        }
     }
 
     /* =============================================
        INIT ALL
        ============================================= */
     function init() {
-        initPreloader();
-        initNavToggle();
         initScrollAnimations();
         initPortfolioFilter();
         initTestimonialCarousel();
-        initBackToTop();
-        initStickyHeader();
+        initFbResponsive();
     }
 
     if (document.readyState === 'loading') {

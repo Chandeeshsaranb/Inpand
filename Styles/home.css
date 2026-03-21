@@ -26,7 +26,8 @@
   --gutter: clamp(1rem, 4vw, 2rem);
 
   --radius: 0.5rem;
-  --radius-lg: 0.75rem; /* FIX 2: added missing variable */
+  --radius-lg: 0.75rem;
+  /* FIX 2: added missing variable */
   --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.14);
 
@@ -69,6 +70,10 @@ a {
 
 a:hover {
   text-decoration: underline;
+}
+
+.btn:hover {
+  text-decoration: none;
 }
 
 ul {
@@ -136,6 +141,7 @@ h6 {
 }
 
 @keyframes bounce {
+
   0%,
   80%,
   100% {
@@ -189,6 +195,7 @@ h6 {
 .site-header {
   position: relative;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+  z-index: 500;
 }
 
 .header-inner {
@@ -290,8 +297,7 @@ h6 {
   text-align: center;
   color: #fff;
   overflow: hidden;
-  background: url("../assets/home-hero.png")
-    center/cover no-repeat;
+  background: url("../assets/home-hero.png") center/cover no-repeat;
 }
 
 .hero::before {
@@ -601,11 +607,9 @@ h6 {
 .portfolio-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(0, 41, 224, 0.88) 0%,
-    rgba(0, 41, 224, 0.3) 100%
-  );
+  background: linear-gradient(to top,
+      rgba(0, 41, 224, 0.88) 0%,
+      rgba(0, 41, 224, 0.3) 100%);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -634,42 +638,47 @@ h6 {
   display: none;
 }
 
-/* =============================================
-   TESTIMONIALS + SOCIAL SECTION
-   ============================================= */
+
 /* =============================================
    TESTIMONIALS + SOCIAL SECTION
    ============================================= */
 
-/* Add this — container-full is used in home.html but was missing */
+/* Outer section */
+.testimonials-social {
+  padding: clamp(3rem, 6vw, 5rem) 0;
+  background: var(--color-white);
+  overflow: hidden;
+}
+
+/* Outer container — full width with side padding */
 .container-full {
   width: 100%;
   max-width: 100%;
   padding-inline: clamp(1.5rem, 4vw, 3rem);
-  box-sizing: border-box; /* FIX 2a: ensure padding is included in width */
-  overflow: hidden;       /* FIX 2b: clip child overflow */
+  box-sizing: border-box;
 }
 
-.testimonials-social {
-  padding: clamp(3rem, 6vw, 5rem) 0;
-  background: var(--color-white);
-  overflow: hidden; /* FIX 1: contain any internal overflow */
-}
-
-.ts-grid {
-  display: grid;
-  grid-template-columns: 65fr 35fr; /* FIX 3: fr units share free space AFTER gap, unlike % which adds gap on top */
+/* ── Flex row: testimonials col + social col side by side ── */
+.ts-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
   gap: clamp(2rem, 5vw, 4rem);
-  align-items: start;
-  min-width: 0; /* FIX 3b: allow grid to shrink below min-content */
 }
 
-.testimonials-col,
+/* Testimonials column: takes ~65% of available width */
+.testimonials-col {
+  flex: 65;
+  min-width: 0;
+}
+
+/* Social column: takes ~35% of available width */
 .social-col {
-  min-width: 0; /* FIX 4: allow grid children to shrink below content size */
-  /* NOTE: overflow:hidden removed — it was clipping the Facebook iframe on mobile */
+  flex: 16;
+  min-width: 0;
 }
 
+/* ── Testimonials column content ── */
 .testimonials-col .section-tag {
   display: block;
   margin-bottom: 0.5rem;
@@ -687,20 +696,20 @@ h6 {
   border-radius: var(--radius);
   padding: 2.5rem;
   min-height: 280px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .testimonial-track {
   display: flex;
   transition: transform 0.5s ease;
   will-change: transform;
-  width: 100%; /* FIX 5a: constrain track to carousel content width */
-  max-width: 100%; /* FIX 5b: prevent track from ever exceeding container */
+  width: 100%;
 }
 
 .testimonial-slide {
   min-width: 100%;
   width: 100%;
-  max-width: 100%; /* FIX 6: hard cap on slide width */
   flex-shrink: 0;
   padding: 0.5rem 1.5rem;
   box-sizing: border-box;
@@ -773,7 +782,7 @@ h6 {
   background: var(--color-primary);
 }
 
-/* Social column */
+/* ── Social column content ── */
 .social-col .section-tag {
   display: block;
   margin-bottom: 0.75rem;
@@ -781,32 +790,34 @@ h6 {
 
 .fb-embed-wrapper {
   border-radius: var(--radius);
-  overflow: hidden;           /* clips rounded corners only, not content */
+  overflow: hidden;
   box-shadow: var(--shadow);
   width: 100%;
   max-width: 100%;
-  /* responsive height: tall enough for timeline content */
   position: relative;
 }
 
 .fb-embed-wrapper iframe {
   display: block;
-  width: 100%;                /* fills wrapper width */
-  height: 500px;              /* fixed height — matches Facebook widget height param */
+  width: 100%;
+  height: 500px;
   border: 0;
   outline: none;
+  border: none;
   min-width: 0;
 }
 
-/* Responsive */
-@media (max-width: 860px) {
-  .ts-grid {
-    grid-template-columns: 1fr;
+/* ── Responsive ── */
+
+/* Tablet: stack columns vertically */
+@media (max-width: 1024px) {
+  .ts-row {
+    flex-direction: column;
     gap: 2rem;
   }
 
-  /* Testimonial carousel: stretch to fill full column width */
   .testimonials-col {
+    flex: none;
     width: 100%;
   }
 
@@ -815,32 +826,35 @@ h6 {
     width: 100%;
   }
 
-  /* Social col: center the Facebook embed in the full-width column */
   .social-col {
+    flex: none;
     width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center; /* center fb embed horizontally */
+    align-items: center;
   }
 
   .social-col .section-tag {
-    width: 100%; /* keep label left-aligned */
+    width: 100%;
   }
 
-  /* Center the wrapper and cap at 500px so FB fills it edge-to-edge */
   .fb-embed-wrapper {
     width: 100%;
     max-width: 500px;
-    margin-inline: auto; /* center in column */
+    margin-inline: auto;
   }
 
   .fb-embed-wrapper iframe {
-    width: 100%;
-    height: 600px; /* taller when full-width for better content visibility */
+    height: 600px;
   }
 }
 
+/* Mobile */
 @media (max-width: 640px) {
+  .testimonials-social .container-full {
+    padding-inline: 1rem;
+  }
+
   .testimonial-carousel {
     padding: 1.5rem 1rem;
   }
@@ -852,6 +866,24 @@ h6 {
 
   .testimonials-col h2 {
     font-size: clamp(1.8rem, 7vw, 2.4rem);
+  }
+
+  .fb-embed-wrapper {
+    max-width: 100%;
+  }
+
+  .fb-embed-wrapper iframe {
+    height: 500px;
+  }
+}
+
+@media (max-width: 420px) {
+  .testimonial-carousel {
+    padding: 1rem 0.875rem;
+  }
+
+  .carousel-controls {
+    gap: 0.75rem;
   }
 }
 
@@ -1181,16 +1213,12 @@ h6 {
     margin-inline: auto;
   }
 
-  .ts-grid {
-    grid-template-columns: 1fr;
-  }
-
   .testimonial-carousel {
     min-height: auto;
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .nav-toggle {
     display: flex;
   }
@@ -1202,14 +1230,12 @@ h6 {
     right: 0;
     background: var(--color-white);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.4s ease;
+    display: none;
     z-index: 100;
   }
 
   .site-nav.open {
-    max-height: 400px;
+    display: block;
   }
 
   .site-nav ul {
@@ -1266,12 +1292,14 @@ h6 {
   }
 
   .testimonials-social .container-full {
-    padding-inline: 1rem; /* FIX 8: was .container (wrong), now targets .container-full */
+    padding-inline: 1rem;
+    /* FIX 8: was .container (wrong), now targets .container-full */
   }
 
   /* Small mobile: fb embed fills viewport width, centered */
   .fb-embed-wrapper {
-    max-width: 100%; /* on small phones, fill fully */
+    max-width: 100%;
+    /* on small phones, fill fully */
   }
 
   .fb-embed-wrapper iframe {
@@ -1307,13 +1335,10 @@ h6 {
 }
 
 @media (max-width: 480px) {
+
   /* Extra safety: all section elements stay within viewport */
   .testimonials-social,
   .container-full,
-  .ts-grid {
-    overflow: hidden;
-  }
-
   /* Testimonial carousel: full width */
   .testimonials-col,
   .testimonial-carousel {
@@ -1340,4 +1365,78 @@ h6 {
   .testimonials-col h2 {
     font-size: clamp(1.4rem, 6vw, 1.75rem);
   }
+}
+
+/* =============================================
+   MOBILE NAV OVERLAY
+   ============================================= */
+.mobile-nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  z-index: 9000;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.mobile-nav-overlay.open {
+  display: flex;
+}
+
+.mobile-nav-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.mobile-nav-logo img {
+  height: 72px;
+  width: auto;
+}
+
+.mobile-nav-close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--color-text);
+  padding: 0.25rem 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.mobile-nav-links {
+  padding: 1.5rem 1.5rem 2rem;
+}
+
+.mobile-nav-links ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-nav-links li {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.mobile-nav-links a {
+  display: block;
+  padding: 1.1rem 0;
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+.mobile-nav-links a:hover,
+.mobile-nav-links a.active {
+  color: var(--color-primary);
+  text-decoration: none;
 }
