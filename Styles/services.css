@@ -216,11 +216,13 @@ h6 {
   font-weight: 700;
   color: var(--color-primary);
   letter-spacing: 0.03em;
+  text-decoration: none;
   transition: color var(--transition);
 }
 
 .btn-link:hover {
   color: var(--color-primary-dark);
+  text-decoration: none;
 }
 
 .btn-pricing {
